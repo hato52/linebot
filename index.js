@@ -10,6 +10,9 @@ const line_config = {
 
 app.listen(process.env.PORT || 3000);
 
+// APIコールのためのクライアントインスタンスを作成
+const bot = new line.Client(line_config);
+
 // webhookのルーティング設定
 app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
     res.sendStatus(200);
