@@ -14,7 +14,7 @@ app.listen(process.env.PORT || 3000);
 app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
     res.sendStatus(200);
 
-    let event_processed = [];
+    let events_processed = [];
 
     // イベントオブジェクトを順次処理。
     req.body.events.forEach((event) => {
