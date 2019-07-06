@@ -37,9 +37,8 @@ new CronJob('0 */20 * * * *', () => {
         });
 
         // 遅延情報があればPUSHメッセージの送信
-        const message = '';
         if (delay_flag == true) {
-            message = {
+            const message = {
                 type: 'text',
                 text: '現在、以下の交通網に遅延が発生しています¥n' + train
             };
