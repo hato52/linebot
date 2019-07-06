@@ -16,7 +16,8 @@ app.listen(process.env.PORT || 3000);
 const client = new line.Client(line_config);
 
 // cronのジョブ設定
-new CronJob('0 */10 6,18 * * *', () => {
+new CronJob('0 */20 * * * *', () => {
+    console.log("遅延情報の取得");
     // 遅延情報の取得とPUSHメッセージの送信
     request.get('https://tetsudo.rti-giken.jp/free/delay.json', (err,res,body) => {
         if (err) {
