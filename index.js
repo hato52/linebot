@@ -17,7 +17,6 @@ const client = new line.Client(line_config);
 
 // cronのジョブ設定
 new CronJob('0 */20 * * * *', () => {
-    console.log("遅延情報の取得");
     // 遅延情報の取得とPUSHメッセージの送信
     request.get('https://tetsudo.rti-giken.jp/free/delay.json', (err,res,body) => {
         if (err) {
@@ -32,15 +31,16 @@ new CronJob('0 */20 * * * *', () => {
         json.forEach((data) => {
             if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線") {
                 delay_flag = true;
-                train += ("・" + data.name + "¥n");
+                train += ("\n・" + data.name);
             }
         });
 
         // 遅延情報があればPUSHメッセージの送信
         if (delay_flag == true) {
+            console.log("遅延が発生しています");
             const message = {
                 type: 'text',
-                text: '現在、以下の交通網に遅延が発生しています¥n' + train
+                text: '現在、以下の交通網に遅延が発生しています\n' + train
             };
 
             client.pushMessage('U98ea37be447321d09ab130f994489f2a', message)
@@ -50,6 +50,8 @@ new CronJob('0 */20 * * * *', () => {
             .catch((err) => {
                 console.log(err);
             });
+        } else {
+            console.log("平常運行です");
         }
     });
 }, null, true);
