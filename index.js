@@ -75,17 +75,17 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
                 }));
             }
         }
+
+        // ルームの参加イベント取得
+        if (event.type == 'join') {
+            console.log(event.source.groupid);
+        }
+
+        // フォローイベントの取得
+        if (event.type == 'unfollow') {
+            console.log(event.source.userid);
+        }
     });
-
-    // ルームの参加イベント取得
-    if (event.type == 'join') {
-        console.log(event.source.groupid);
-    }
-
-    // フォローイベントの取得
-    if (event.type == 'unfollow') {
-        console.log(event.source.userid);
-    }
 
     // すべてのイベント処理が終了したら何個のイベントが処理されたか出力。
     Promise.all(events_processed).then(
