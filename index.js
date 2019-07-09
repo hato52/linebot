@@ -43,7 +43,7 @@ new CronJob('0 */20 * * * *', () => {
                 text: '現在、以下の交通網に遅延が発生しています\n' + train
             };
 
-            client.pushMessage('U98ea37be447321d09ab130f994489f2a', message)
+            client.pushMessage(process.env.LINE_USER_ID, message)
             .then(() => {
                 console.log("PUSHメッセージの送信完了");
             })
@@ -76,6 +76,16 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
             }
         }
     });
+
+    // ルームの参加イベント取得
+    if (event.type == 'join') {
+        console.log(event.source.groupid);
+    }
+
+    // フォローイベントの取得
+    if (event.type == 'unfollow') {
+        console.log(event.source.userid);
+    }
 
     // すべてのイベント処理が終了したら何個のイベントが処理されたか出力。
     Promise.all(events_processed).then(
