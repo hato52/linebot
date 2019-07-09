@@ -83,6 +83,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
 
         // フォローイベントの取得
         if (event.type == 'unfollow') {
+            console.log(event);
             console.log(event.source.userid);
         }
     });
