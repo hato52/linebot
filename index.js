@@ -78,13 +78,13 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
 
         // ルームの参加イベント取得
         if (event.type == 'join') {
-            console.log(event.source.groupid);
+            console.log(event.source.groupId);
         }
 
         // フォローイベントの取得
         if (event.type == 'unfollow') {
             console.log(event);
-            console.log(event.source.userid);
+            console.log(event.source.userId);
         }
     });
 
