@@ -2,21 +2,31 @@ const request = require('request');
 const express = require('express');
 const line = require('@line/bot-sdk');
 const CronJob = require('cron').CronJob;
+const Client = require('pg');
 
-const app = express();
-
+// 初期化
+// LINEのあれこれ
 const line_config = {
     channelAccessToken: process.env.LINE_ACCESS_TOKEN,
     channelSecret: process.env.LINE_CHANNEL_SECRET
 };
 
+// DBのあれこれ
+const db_client = new Client({
+    connectionString: process.env.DATABASE_URL
+});
+db_client.connect();
+
+// サーバのあれこれ
+const app = express();
 app.listen(process.env.PORT || 3000);
 
 // APIコールのためのクライアントインスタンスを作成
 const client = new line.Client(line_config);
 
 // cronのジョブ設定
-new CronJob('0 */20 * * * *', () => {
+// 平日に20分置きに取得 通勤と退勤のタイミングのみ
+new CronJob('0 */20 5-7,17-19 * * 1-5', () => {
     // 遅延情報の取得とPUSHメッセージの送信
     request.get('https://tetsudo.rti-giken.jp/free/delay.json', (err,res,body) => {
         if (err) {
@@ -29,7 +39,7 @@ new CronJob('0 */20 * * * *', () => {
         let train = "";
         let json = JSON.parse(body);
         json.forEach((data) => {
-            if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線") {
+            if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線") {
                 delay_flag = true;
                 train += ("\n・" + data.name);
             }
@@ -64,7 +74,8 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
 
     // イベントオブジェクトを順次処理。
     req.body.events.forEach((event) => {
-        // この処理の対象をイベントタイプがメッセージで、かつ、テキストタイプだった場合に限定。
+
+        // メッセージイベントの取得
         if (event.type == 'message' && event.message.type == 'text'){
             // ユーザーからのテキストメッセージが「こんにちは」だった場合のみ反応。
             if (event.message.text == 'こんにちは'){
@@ -76,15 +87,54 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
             }
         }
 
-        // ルームの参加イベント取得
+        // ルーム参加イベントの取得
         if (event.type == 'join') {
             console.log(event.source.groupId);
+
+            // グループIDをDBに保存
+            const query = {
+                text: 'INSERT INTO destination(id) VALUES($1)',
+                value: event.source.groupId
+            };
+
+            client.query(query, (err, res) => {
+                if (err) {
+                    console.log(err);
+                }
+            });
         }
 
         // フォローイベントの取得
-        if (event.type == 'unfollow') {
-            console.log(event);
+        if (event.type == 'follow') {
             console.log(event.source.userId);
+
+            // ユーザIDをDBに保存
+            const query = {
+                text: 'INSERT INTO destination(id) VALUES($1)',
+                value: event.source.userId
+            };
+
+            client.query(query, (err, res) => {
+                if (err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        if (event.type == 'unfollow') {
+            console.log(event.source.userId);
+
+            // ユーザIDをDBに保存
+            const query = {
+                text: 'INSERT INTO destination(id) VALUES($1)',
+                value: event.source.userId
+            };
+
+            client.query(query, (err, res) => {
+                if (err) {
+                    console.log(err);
+                }
+            });
         }
     });
 
