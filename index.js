@@ -94,7 +94,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
             // グループIDをDBに保存
             const query = {
                 text: 'INSERT INTO destination(id) VALUES($1)',
-                value: event.source.groupId
+                value: [event.source.groupId]
             };
 
             db_client.query(query, (err, res) => {
@@ -111,7 +111,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
             // ユーザIDをDBに保存
             const query = {
                 text: 'INSERT INTO destination(id) VALUES($1)',
-                value: event.source.userId
+                value: [event.source.userId]
             };
 
             db_client.query(query, (err, res) => {
@@ -127,7 +127,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
             // ユーザIDをDBに保存
             const query = {
                 text: 'INSERT INTO destination(id) VALUES($1)',
-                value: event.source.userId
+                value: [event.source.userId]
             };
 
             db_client.query(query, (err, res) => {
