@@ -2,7 +2,7 @@ const request = require('request');
 const express = require('express');
 const line = require('@line/bot-sdk');
 const CronJob = require('cron').CronJob;
-const Client = require('pg');
+const Client = require('pg').Client;
 
 // 初期化
 // LINEのあれこれ
@@ -97,7 +97,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
                 value: event.source.groupId
             };
 
-            client.query(query, (err, res) => {
+            db_client.query(query, (err, res) => {
                 if (err) {
                     console.log(err);
                 }
@@ -114,7 +114,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
                 value: event.source.userId
             };
 
-            client.query(query, (err, res) => {
+            db_client.query(query, (err, res) => {
                 if (err) {
                     console.log(err);
                 }
@@ -130,7 +130,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
                 value: event.source.userId
             };
 
-            client.query(query, (err, res) => {
+            db_client.query(query, (err, res) => {
                 if (err) {
                     console.log(err);
                 }
