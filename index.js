@@ -276,6 +276,7 @@ function get_api(message_type) {
                 break;
         }
 
+        // 処理をブロックせずに先に進むため、コールバック内にreturnを記述
         console.log(message);
         return message;
     });
