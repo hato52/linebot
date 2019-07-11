@@ -111,11 +111,12 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
     // イベントオブジェクトを順次処理。
     req.body.events.forEach((event) => {
         let query;
+        let events_processed = [];
         switch (event.type) {
             case 'message':
                 if (event.message.type == 'text' && event.message.text == '遅延') {
                     let message = get_api('REPLY');
-                    client.replyMessage(event.replyToken, message);
+                    events_processed.push(client.replyMessage(event.replyToken, message));
                 } 
                 break;
 
