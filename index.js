@@ -228,6 +228,7 @@ function get_api(message_type) {
         switch(message_type) {
             // プッシュメッセージ
             case 'PUSH':
+                console.log('get_api [PUSH]');
                 let delay_flag = false;
                 json.forEach((data) => {
                     if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線") {
@@ -248,6 +249,7 @@ function get_api(message_type) {
 
             // リプライメッセージ
             case 'REPLY':
+                console.log('get_api [REPLY]');
                 json.forEach((data) => {
                     train += ("\n・" + data.name);
                 });
@@ -258,10 +260,12 @@ function get_api(message_type) {
                 break;
 
             default:
+                console.log('get_api [DEFAULT]');
                 message = null;
                 break;
         }
 
+        console.log(message);
         return message;
     });
 }
