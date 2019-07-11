@@ -130,21 +130,19 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
                             });
 
                             // 遅延情報があればPUSHメッセージの送信
-                            if (delay_flag == true) {
-                                console.log("遅延が発生しています");
-                                const message = {
-                                    type: 'text',
-                                    text: '現在、以下の交通網に遅延が発生しています\n' + train
-                                };
+                            console.log("遅延が発生しています");
+                            const message = {
+                                type: 'text',
+                                text: '現在、以下の交通網に遅延が発生しています\n' + train
+                            };
 
-                                client.replyMessage(event.replyToken, message)
-                                .then(() => {
-                                    console.log("リプライメッセージの送信完了");
-                                })
-                                .catch((err) => {
-                                    console.log(err);
-                                });
-                            }
+                            client.replyMessage(event.replyToken, message)
+                            .then(() => {
+                                console.log("リプライメッセージの送信完了");
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                            });
                         });
                     }
                 }
