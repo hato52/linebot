@@ -224,60 +224,66 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
 
 // 遅延情報の取得
 function get_api(message_type) {
-    // APIにリクエストを送信
-    request.get('https://tetsudo.rti-giken.jp/free/delay.json', (err,res,body) => {
-        // エラーチェック
-        if (err) {
-            console.log(err);
-            return;
-        }
+    new Promise ((resolve, reject) => {
+        // APIにリクエストを送信
+        request.get('https://tetsudo.rti-giken.jp/free/delay.json', (err,res,body) => {
+            // エラーチェック
+            if (err) {
+                console.log(err);
+                return;
+            }
 
-        // JSONの解析とテキスト生成
-        let train = '';
-        let message;
-        let json = JSON.parse(body);
-        switch(message_type) {
-            // プッシュメッセージ
-            case 'PUSH':
-                console.log('get_api [PUSH]');
-                let delay_flag = false;
-                json.forEach((data) => {
-                    if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線") {
-                        delay_flag = true;
-                        train += ("\n・" + data.name);
+            // JSONの解析とテキスト生成
+            let train = '';
+            let message;
+            let json = JSON.parse(body);
+            switch(message_type) {
+                // プッシュメッセージ
+                case 'PUSH':
+                    console.log('get_api [PUSH]');
+                    let delay_flag = false;
+                    json.forEach((data) => {
+                        if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線") {
+                            delay_flag = true;
+                            train += ("\n・" + data.name);
+                        }
+                    });
+                    if (delay_flag == true) {
+                        console.log("遅延が発生しています");
+                        message = {
+                            type: 'text',
+                            text: '現在、以下の交通網に遅延が発生しています\n' + train
+                        };
+                    } else {
+                        message = null;
                     }
-                });
-                if (delay_flag == true) {
-                    console.log("遅延が発生しています");
+                    break;
+
+                // リプライメッセージ
+                case 'REPLY':
+                    console.log('get_api [REPLY]');
+                    json.forEach((data) => {
+                        train += ("\n・" + data.name);
+                    });
                     message = {
                         type: 'text',
                         text: '現在、以下の交通網に遅延が発生しています\n' + train
                     };
-                } else {
+                    break;
+
+                default:
+                    console.log('get_api [DEFAULT]');
                     message = null;
-                }
-                break;
+                    break;
+            }
+        });
 
-            // リプライメッセージ
-            case 'REPLY':
-                console.log('get_api [REPLY]');
-                json.forEach((data) => {
-                    train += ("\n・" + data.name);
-                });
-                message = {
-                    type: 'text',
-                    text: '現在、以下の交通網に遅延が発生しています\n' + train
-                };
-                break;
-
-            default:
-                console.log('get_api [DEFAULT]');
-                message = null;
-                break;
-        }
-
-        // 処理をブロックせずに先に進むため、コールバック内にreturnを記述
-        console.log(message);
-        return message;
+        resolve(message);
+    }).then((result) => {
+        console.log(result);
+        return result;
+    }).catch((err) => {
+        console.log(err);
+        return null;
     });
 }
