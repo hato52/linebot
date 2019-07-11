@@ -115,6 +115,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
             case 'message':
                 if (event.message.type == 'text' && event.message.text == '遅延') {
                     let message = get_api('REPLY');
+                    console.log(message);
                     client.replyMessage(event.replyToken, {
                         type: 'text',
                         text: 'いえあ'
