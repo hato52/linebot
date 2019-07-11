@@ -276,11 +276,11 @@ function get_api(message_type) {
                     message = null;
                     break;
             }
-        });
 
-        resolve(message);
+            resolve(message);
+        });
     }).then((result) => {
-        console.log(result);
+        console.log("result is " + result);
         return result;
     }).catch((err) => {
         console.log(err);
