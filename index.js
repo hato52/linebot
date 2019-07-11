@@ -1,4 +1,4 @@
-const request = require('request');
+const request = require('request-promise');
 const express = require('express');
 const line = require('@line/bot-sdk');
 const CronJob = require('cron').CronJob;
@@ -224,9 +224,9 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
 
 // 遅延情報の取得
 function get_api(message_type) {
-    new Promise ((resolve, reject) => {
-        // APIにリクエストを送信
-        request.get('https://tetsudo.rti-giken.jp/free/delay.json', (err,res,body) => {
+    // APIにリクエストを送信
+    request('https://tetsudo.rti-giken.jp/free/delay.json')
+        .then((body) => {
             // エラーチェック
             if (err) {
                 console.log(err);
@@ -277,13 +277,11 @@ function get_api(message_type) {
                     break;
             }
 
-            resolve(message);
+            console.log("result is " + message);
+            return message;
+        })
+        .catch((err) => {
+            console.log(err);
+            return null;
         });
-    }).then((result) => {
-        console.log("result is " + result);
-        return result;
-    }).catch((err) => {
-        console.log(err);
-        return null;
-    });
 }
