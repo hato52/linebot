@@ -227,11 +227,6 @@ function get_api(message_type) {
     // APIにリクエストを送信
     request('https://tetsudo.rti-giken.jp/free/delay.json')
         .then((body) => {
-            // エラーチェック
-            if (err) {
-                console.log(err);
-                return;
-            }
 
             // JSONの解析とテキスト生成
             let train = '';
