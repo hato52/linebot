@@ -114,18 +114,30 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
         switch (event.type) {
             case 'message':
                 if (event.message.type == 'text' && event.message.text == '遅延') {
-                    let message = get_api('REPLY');
-                    console.log(message);
-                    client.replyMessage(event.replyToken, {
-                        type: 'text',
-                        text: 'いえあ'
+                    new Promise((resolve, reject) => {
+                        let message = get_api('REPLY');
+                        if (message != null) {
+                            resolve(message);
+                        }
                     })
-                    .then(() => {
-                        console.log("リプライメッセージの送信完了");
+                    .then((message) => {
+                        console.log(message);
+                        client.replyMessage(event.replyToken, {
+                            type: 'text',
+                            text: 'いえあ'
+                        })
+                        .then(() => {
+                            console.log("リプライメッセージの送信完了");
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                        });
                     })
                     .catch((err) => {
                         console.log(err);
                     });
+                    
+                    
                     // client.replyMessage(event.replyToken, message)
                     //     .then(() => {
                     //         console.log("リプライメッセージの送信完了");
