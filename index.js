@@ -110,6 +110,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
 
     // イベントオブジェクトを順次処理。
     req.body.events.forEach((event) => {
+        let query;
         switch (event.type) {
             case 'message':
                 if (event.message.type == 'text' && event.message.text == '遅延') {
@@ -122,7 +123,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
                 console.log(event.source.groupId);
 
                 // グループIDをDBに保存
-                let query = {
+                query = {
                     text: 'INSERT INTO destination(id) VALUES($1)',
                     values: [event.source.groupId]
                 };
@@ -138,7 +139,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
                 console.log(event.source.userId);
 
                 // ユーザIDをDBに保存
-                let query = {
+                query = {
                     text: 'INSERT INTO destination(id) VALUES($1)',
                     values: [event.source.userId]
                 };
