@@ -54,20 +54,20 @@ new CronJob('0 */3 5-7,17-19 * * 1-5', () => {
                 text: '現在、以下の交通網に遅延が発生しています\n' + train
             };
 
-            let to = [];
+            let to_user = [];
             // メッセージの送信先をDBから取得して送信先文字列を形成
-            db_client.query('SELECT id from destination', (err, res) => {
+            db_client.query("SELECT id FROM destination WHERE type='userId'", (err, res) => {
                 if (err) {
                     console.log(err);
                 }
 
                 res.rows.forEach((row) => {
-                    to.push(row['id']);
+                    to_user.push(row['id']);
                 });
 
                 // PUSHメッセージの送信
-                console.log(to);
-                client.multicast(to, message)
+                console.log(to_user);
+                client.multicast(to_user, message)
                 .then(() => {
                     console.log("PUSHメッセージの送信完了");
                 })
@@ -76,6 +76,22 @@ new CronJob('0 */3 5-7,17-19 * * 1-5', () => {
                 });
             });
 
+            // グループには１件ずつ送信
+            db_client.query("SELECT id FROM destination WHERE type='groupId'", (err, res) => {
+                if (err) {
+                    console.log(err);
+                }
+
+                res.rows.forEach((row) => {
+                    client.pushMessage(row['id'], message)
+                    .then(() => {
+                        console.log("PUSHメッセージの送信完了");
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+                })
+            });
         } else {
             console.log("平常運行です");
         }
@@ -132,8 +148,8 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
 
                 // グループIDをDBに保存
                 query = {
-                    text: 'INSERT INTO destination(id) VALUES($1)',
-                    values: [event.source.groupId]
+                    text: 'INSERT INTO destination(id, type) VALUES($1, $2)',
+                    values: [event.source.groupId, 'groupId']
                 };
     
                 db_client.query(query, (err, res) => {
@@ -149,8 +165,8 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
 
                 // ユーザIDをDBに保存
                 query = {
-                    text: 'INSERT INTO destination(id) VALUES($1)',
-                    values: [event.source.userId]
+                    text: 'INSERT INTO destination(id, type) VALUES($1, $2)',
+                    values: [event.source.userId, 'userId']
                 };
     
                 db_client.query(query, (err, res) => {
