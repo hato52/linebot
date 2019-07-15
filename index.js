@@ -61,22 +61,21 @@ new CronJob('0 */3 5-7,17-19 * * 1-5', () => {
                     console.log(err);
                 }
 
-                console.log("レスポンス");
-                console.log(res);
                 res.rows.forEach((row) => {
                     to.push(row);
-                    console.log(row);
+                });
+
+                // PUSHメッセージの送信
+                console.log(to);
+                client.multicast(to, message)
+                .then(() => {
+                    console.log("PUSHメッセージの送信完了");
+                })
+                .catch((err) => {
+                    console.log(err);
                 });
             });
-            console.log(to);
 
-            client.multicast(to, message)
-            .then(() => {
-                console.log("PUSHメッセージの送信完了");
-            })
-            .catch((err) => {
-                console.log(err);
-            });
         } else {
             console.log("平常運行です");
         }
