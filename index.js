@@ -26,7 +26,7 @@ const client = new line.Client(line_config);
 
 // cronのジョブ設定
 // 平日に20分置きに取得 通勤と退勤のタイミングのみ
-new CronJob('0 */20 5-7,17-19 * * 1-5', () => {
+new CronJob('0 */3 5-7,17-19 * * 1-5', () => {
 
     // 遅延情報の取得とPUSHメッセージの送信
     request.get('https://tetsudo.rti-giken.jp/free/delay.json', (err,res,body) => {
@@ -60,9 +60,12 @@ new CronJob('0 */20 5-7,17-19 * * 1-5', () => {
                 if (err) {
                     console.log(err);
                 }
-                // TODO ここの部分をちゃんとする
+
+                console.log("レスポンス");
+                console.log(res);
                 res.rows.forEach((row) => {
                     to.push(row);
+                    console.log(row);
                 });
             });
             console.log(to);
