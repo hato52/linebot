@@ -26,7 +26,7 @@ const client = new line.Client(line_config);
 
 // cronのジョブ設定
 // 平日に20分置きに取得 通勤と退勤のタイミングのみ
-new CronJob('0 */3 5-7,17-19 * * 1-5', () => {
+new CronJob('0 */20 5-7,17-19 * * 1-5', () => {
 
     // 遅延情報の取得とPUSHメッセージの送信
     request.get('https://tetsudo.rti-giken.jp/free/delay.json', (err,res,body) => {
@@ -40,10 +40,10 @@ new CronJob('0 */3 5-7,17-19 * * 1-5', () => {
         let train = "";
         let json = JSON.parse(body);
         json.forEach((data) => {
-            // if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線") {
+            if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線") {
                 delay_flag = true;
                 train += ("\n・" + data.name);
-            // }
+            }
         });
 
         // 遅延情報があればPUSHメッセージの送信
