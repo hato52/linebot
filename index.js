@@ -66,10 +66,10 @@ new CronJob('0 */3 5-7,17-19 * * 1-5', () => {
                 });
 
                 // PUSHメッセージの送信
-                console.log(to_user);
+                //console.log(to_user);
                 client.multicast(to_user, message)
                 .then(() => {
-                    console.log("PUSHメッセージの送信完了");
+                    console.log("PUSHメッセージの送信完了 送信先：" + to_user);
                 })
                 .catch((err) => {
                     console.log(err);
@@ -85,7 +85,7 @@ new CronJob('0 */3 5-7,17-19 * * 1-5', () => {
                 res.rows.forEach((row) => {
                     client.pushMessage(row['id'], message)
                     .then(() => {
-                        console.log("PUSHメッセージの送信完了");
+                        console.log("PUSHメッセージの送信完了 送信先：" + row['id']);
                     })
                     .catch((err) => {
                         console.log(err);
@@ -144,7 +144,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
 
             // ルーム参加イベント
             case 'join':
-                console.log(event.source.groupId);
+                //console.log(event.source.groupId);
 
                 // グループIDをDBに保存
                 query = {
@@ -161,7 +161,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
 
             // フォローイベント
             case 'follow':
-                console.log(event.source.userId);
+                //console.log(event.source.userId);
 
                 // ユーザIDをDBに保存
                 query = {
@@ -178,7 +178,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
 
             // ルーム退出イベント
             case 'leave':
-                console.log(event.source.groupId);
+                //console.log(event.source.groupId);
 
                 query = {
                     text: 'DELETE FROM destination WHERE id=$1',
@@ -194,19 +194,19 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
 
             // フォロー解除イベント
             case 'unfollow':
-                    console.log(event.source.userId);
-    
-                    query = {
-                        text: 'DELETE FROM destination WHERE id=$1',
-                        values: [event.source.userId]
+                //console.log(event.source.userId);
+
+                query = {
+                    text: 'DELETE FROM destination WHERE id=$1',
+                    values: [event.source.userId]
+                }
+
+                db_client.query(query, (err, res) => {
+                    if (err) {
+                        console.log(err);
                     }
-    
-                    db_client.query(query, (err, res) => {
-                        if (err) {
-                            console.log(err);
-                        }
-                    });
-                    break;
+                });
+                break;
 
             default:
                 break;
