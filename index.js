@@ -40,10 +40,10 @@ new CronJob('0 */20 5-7,17-19 * * 1-5', () => {
         let train = "";
         let json = JSON.parse(body);
         json.forEach((data) => {
-           // if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線") {
+            if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線") {
                 delay_flag = true;
                 train += ("\n・" + data.name);
-            //}
+            }
         });
 
         // 遅延情報があればPUSHメッセージの送信
@@ -54,13 +54,13 @@ new CronJob('0 */20 5-7,17-19 * * 1-5', () => {
                 text: '現在、以下の交通網に遅延が発生しています\n' + train
             };
 
+            let to = [];
             // メッセージの送信先をDBから取得して送信先文字列を形成
             db_client.query('SELECT id from destination', (err, res) => {
                 if (err) {
                     console.log(err);
                 }
                 // TODO ここの部分をちゃんとする
-                let to = [];
                 res.rows.forEach((row) => {
                     to.push(row);
                 });
@@ -88,6 +88,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
     req.body.events.forEach((event) => {
         let query;
         switch (event.type) {
+            // メッセージイベント
             case 'message':
                 if (event.message.type == 'text') {
                     if (event.message.text == '遅延'){
@@ -123,6 +124,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
                 }
                 break;
 
+            // ルーム参加イベント
             case 'join':
                 console.log(event.source.groupId);
 
@@ -139,6 +141,7 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
                 });
                 break;
 
+            // フォローイベント
             case 'follow':
                 console.log(event.source.userId);
 
@@ -154,6 +157,38 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
                     }
                 });
                 break;
+
+            // ルーム退出イベント
+            case 'leave':
+                console.log(event.source.groupId);
+
+                query = {
+                    text: 'DELETE FROM destination WHERE id=$1',
+                    values: [event.source.groupId]
+                }
+
+                db_client.query(query, (err, res) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                });
+                break;
+
+            // フォロー解除イベント
+            case 'unfollow':
+                    console.log(event.source.userId);
+    
+                    query = {
+                        text: 'DELETE FROM destination WHERE id=$1',
+                        values: [event.source.userId]
+                    }
+    
+                    db_client.query(query, (err, res) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                    });
+                    break;
 
             default:
                 break;
