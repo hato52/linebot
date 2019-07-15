@@ -62,7 +62,7 @@ new CronJob('0 */3 5-7,17-19 * * 1-5', () => {
                 }
 
                 res.rows.forEach((row) => {
-                    to.push(row);
+                    to.push(row['id']);
                 });
 
                 // PUSHメッセージの送信
