@@ -40,10 +40,10 @@ new CronJob('0 */20 5-7,17-19 * * 1-5', () => {
         let train = "";
         let json = JSON.parse(body);
         json.forEach((data) => {
-            if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線") {
+            // if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線") {
                 delay_flag = true;
                 train += ("\n・" + data.name);
-            }
+            // }
         });
 
         // 遅延情報があればPUSHメッセージの送信
