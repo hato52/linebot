@@ -27,31 +27,6 @@ const client = new line.Client(line_config);
 // cronのジョブ設定
 // 平日に20分置きに取得 通勤と退勤のタイミングのみ
 new CronJob('0 */20 5-7,17-19 * * 1-5', () => {
-    // const message = get_api('PUSH');
-
-    // if (message == null) {
-    //     console.log("平常運行です");
-    // } else {
-    //     // メッセージの送信先をDBから取得して送信先文字列を形成
-    //     db_client.query('SELECT id from destination', (err, res) => {
-    //         if (err) {
-    //             console.log(err);
-    //         }
-    //         let to = [];
-    //         res.rows.forEach((row) => {
-    //             to.push(row);
-    //         });
-    //     });
-    //     console.log(to);
-
-    //     client.multicast(to, message)
-    //     .then(() => {
-    //         console.log("PUSHメッセージの送信完了");
-    //     })
-    //     .catch((err) => {
-    //         console.log(err);
-    //     });
-    // }
 
     // 遅延情報の取得とPUSHメッセージの送信
     request.get('https://tetsudo.rti-giken.jp/free/delay.json', (err,res,body) => {
@@ -65,10 +40,10 @@ new CronJob('0 */20 5-7,17-19 * * 1-5', () => {
         let train = "";
         let json = JSON.parse(body);
         json.forEach((data) => {
-            if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線") {
+           // if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線") {
                 delay_flag = true;
                 train += ("\n・" + data.name);
-            }
+            //}
         });
 
         // 遅延情報があればPUSHメッセージの送信
