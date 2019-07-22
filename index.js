@@ -141,20 +141,20 @@ app.post('/bot/webhook', line.middleware(line_config), (req, res, next) => {
                     }
 
                     // おーん
-                    if (event.message.text == 'おーん' || event.message.text == 'おん') {
-                        const message = {
-                            type: 'text',
-                            text: 'おーん'
-                        };
+                    // if (event.message.text == 'おーん' || event.message.text == 'おん') {
+                    //     const message = {
+                    //         type: 'text',
+                    //         text: 'おーん'
+                    //     };
 
-                        client.replyMessage(event.replyToken, message)
-                        .then(() => {
-                            console.log("リプライメッセージの送信完了");
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                        });
-                    }
+                    //     client.replyMessage(event.replyToken, message)
+                    //     .then(() => {
+                    //         console.log("リプライメッセージの送信完了");
+                    //     })
+                    //     .catch((err) => {
+                    //         console.log(err);
+                    //     });
+                    // }
                 }
                 break;
 
