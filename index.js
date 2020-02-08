@@ -25,7 +25,7 @@ app.listen(process.env.PORT || 3000);
 const client = new line.Client(line_config);
 
 // IPAぼっと
-new CronJob('0 */5 * 8-10 2 *', () => {
+new CronJob('* */10 1 * * *', () => {
     console.log("[IPA]");
     const message = {
         type: 'text',
