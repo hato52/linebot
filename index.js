@@ -25,28 +25,52 @@ app.listen(process.env.PORT || 3000);
 const client = new line.Client(line_config);
 
 // IPAぼっと
-new CronJob('0 0 10 8-10 2 *', () => {
+new CronJob('0 */5 * 8-10 2 *', () => {
+    console.log("[IPA]");
     const message = {
         type: 'text',
         text: '上人へ\n\nIPAにお金を捧げましょう\nhttps://www.jitec.ipa.go.jp/1_01mosikomi/_index_mosikomi.html'
     };
 
-    // グループには１件ずつ送信
-    db_client.query("SELECT id FROM destination WHERE type='groupId'", (err, res) => {
+    let to_user = [];
+    // メッセージの送信先をDBから取得して送信先文字列を形成
+    db_client.query("SELECT id FROM destination WHERE type='userId'", (err, res) => {
         if (err) {
+            console.log("DB ERROR!!!");
             console.log(err);
         }
 
         res.rows.forEach((row) => {
-            client.pushMessage(row['id'], message)
-            .then(() => {
-                console.log("PUSHメッセージの送信完了 送信先：" + row['id']);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+            to_user.push(row['id']);
+        });
+
+        // PUSHメッセージの送信
+        //console.log(to_user);
+        client.multicast(to_user, message)
+        .then(() => {
+            console.log("PUSHメッセージの送信完了 送信先：" + to_user);
         })
+        .catch((err) => {
+            console.log(err);
+        });
     });
+
+    // グループには１件ずつ送信
+    // db_client.query("SELECT id FROM destination WHERE type='groupId'", (err, res) => {
+    //     if (err) {
+    //         console.log(err);
+    //     }
+
+    //     res.rows.forEach((row) => {
+    //         client.pushMessage(row['id'], message)
+    //         .then(() => {
+    //             console.log("PUSHメッセージの送信完了 送信先：" + row['id']);
+    //         })
+    //         .catch((err) => {
+    //             console.log(err);
+    //         });
+    //     })
+    // });
 });
 
 // cronのジョブ設定
