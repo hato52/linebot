@@ -24,58 +24,9 @@ app.listen(process.env.PORT || 3000);
 // APIコールのためのクライアントインスタンスを作成
 const client = new line.Client(line_config);
 
-// IPAぼっと
-new CronJob('* */10 1 * * *', () => {
-    console.log("[IPA]");
-    const message = {
-        type: 'text',
-        text: '上人へ\n\nIPAにお金を捧げましょう\nhttps://www.jitec.ipa.go.jp/1_01mosikomi/_index_mosikomi.html'
-    };
-
-    let to_user = [];
-    // メッセージの送信先をDBから取得して送信先文字列を形成
-    db_client.query("SELECT id FROM destination WHERE type='userId'", (err, res) => {
-        if (err) {
-            console.log("DB ERROR!!!");
-            console.log(err);
-        }
-
-        res.rows.forEach((row) => {
-            to_user.push(row['id']);
-        });
-
-        // PUSHメッセージの送信
-        //console.log(to_user);
-        client.multicast(to_user, message)
-        .then(() => {
-            console.log("PUSHメッセージの送信完了 送信先：" + to_user);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-    });
-
-    // グループには１件ずつ送信
-    // db_client.query("SELECT id FROM destination WHERE type='groupId'", (err, res) => {
-    //     if (err) {
-    //         console.log(err);
-    //     }
-
-    //     res.rows.forEach((row) => {
-    //         client.pushMessage(row['id'], message)
-    //         .then(() => {
-    //             console.log("PUSHメッセージの送信完了 送信先：" + row['id']);
-    //         })
-    //         .catch((err) => {
-    //             console.log(err);
-    //         });
-    //     })
-    // });
-});
-
 // cronのジョブ設定
 // 平日に20分置きに取得 通勤と退勤のタイミングのみ
-new CronJob('0 */20 5-7,17-19 * * 1-5', () => {
+new CronJob('0 */20 5-7,13-15 * * *', () => {
 
     // 遅延情報の取得とPUSHメッセージの送信
     request.get('https://tetsudo.rti-giken.jp/free/delay.json', (err,res,body) => {
@@ -143,6 +94,50 @@ new CronJob('0 */20 5-7,17-19 * * 1-5', () => {
             });
         } else {
             console.log("平常運行です");
+
+            const message = {
+                type: 'text',
+                text: '上人へ\n\nIPAにお金を払いましょう\n https://www.jitec.ipa.go.jp/1_01mosikomi/_index_mosikomi.html'
+            };
+
+            let to_user = [];
+            // メッセージの送信先をDBから取得して送信先文字列を形成
+            db_client.query("SELECT id FROM destination WHERE type='userId'", (err, res) => {
+                if (err) {
+                    console.log(err);
+                }
+
+                res.rows.forEach((row) => {
+                    to_user.push(row['id']);
+                });
+
+                // PUSHメッセージの送信
+                //console.log(to_user);
+                client.multicast(to_user, message)
+                .then(() => {
+                    console.log("PUSHメッセージの送信完了 送信先：" + to_user);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+            });
+
+            // グループには１件ずつ送信
+            db_client.query("SELECT id FROM destination WHERE type='groupId'", (err, res) => {
+                if (err) {
+                    console.log(err);
+                }
+
+                res.rows.forEach((row) => {
+                    client.pushMessage(row['id'], message)
+                    .then(() => {
+                        console.log("PUSHメッセージの送信完了 送信先：" + row['id']);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+                })
+            });
         }
     });
 }, null, true);
