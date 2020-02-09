@@ -26,120 +26,165 @@ const client = new line.Client(line_config);
 
 // cronのジョブ設定
 // 平日に20分置きに取得 通勤と退勤のタイミングのみ
-new CronJob('0 */20 5-7,13-15 * * *', () => {
+new CronJob('0 */30 17 * * *', () => {
 
-    // 遅延情報の取得とPUSHメッセージの送信
-    request.get('https://tetsudo.rti-giken.jp/free/delay.json', (err,res,body) => {
+    console.log("API")
+    const message = {
+        type: 'text',
+        text: '上人へ\n\nIPAにお金を払いましょう\n https://www.jitec.ipa.go.jp/1_01mosikomi/_index_mosikomi.html'
+    };
+
+    let to_user = [];
+    // メッセージの送信先をDBから取得して送信先文字列を形成
+    db_client.query("SELECT id FROM destination WHERE type='userId'", (err, res) => {
         if (err) {
             console.log(err);
-            return;
         }
 
-        let delay_flag = false;
-        // 取得したJSONをパースする
-        let train = "";
-        let json = JSON.parse(body);
-        json.forEach((data) => {
-            if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線" || data.name == "名鉄線") {
-                delay_flag = true;
-                train += ("\n・" + data.name);
-            }
+        res.rows.forEach((row) => {
+            to_user.push(row['id']);
         });
 
-        // 遅延情報があればPUSHメッセージの送信
-        if (delay_flag == true) {
-            console.log("遅延が発生しています");
-            const message = {
-                type: 'text',
-                text: '現在、以下の交通網に遅延が発生しています\n' + train
-            };
-
-            let to_user = [];
-            // メッセージの送信先をDBから取得して送信先文字列を形成
-            db_client.query("SELECT id FROM destination WHERE type='userId'", (err, res) => {
-                if (err) {
-                    console.log(err);
-                }
-
-                res.rows.forEach((row) => {
-                    to_user.push(row['id']);
-                });
-
-                // PUSHメッセージの送信
-                //console.log(to_user);
-                client.multicast(to_user, message)
-                .then(() => {
-                    console.log("PUSHメッセージの送信完了 送信先：" + to_user);
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-            });
-
-            // グループには１件ずつ送信
-            db_client.query("SELECT id FROM destination WHERE type='groupId'", (err, res) => {
-                if (err) {
-                    console.log(err);
-                }
-
-                res.rows.forEach((row) => {
-                    client.pushMessage(row['id'], message)
-                    .then(() => {
-                        console.log("PUSHメッセージの送信完了 送信先：" + row['id']);
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
-                })
-            });
-        } else {
-            console.log("平常運行です");
-
-            const message = {
-                type: 'text',
-                text: '上人へ\n\nIPAにお金を払いましょう\n https://www.jitec.ipa.go.jp/1_01mosikomi/_index_mosikomi.html'
-            };
-
-            let to_user = [];
-            // メッセージの送信先をDBから取得して送信先文字列を形成
-            db_client.query("SELECT id FROM destination WHERE type='userId'", (err, res) => {
-                if (err) {
-                    console.log(err);
-                }
-
-                res.rows.forEach((row) => {
-                    to_user.push(row['id']);
-                });
-
-                // PUSHメッセージの送信
-                //console.log(to_user);
-                client.multicast(to_user, message)
-                .then(() => {
-                    console.log("PUSHメッセージの送信完了 送信先：" + to_user);
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-            });
-
-            // グループには１件ずつ送信
-            db_client.query("SELECT id FROM destination WHERE type='groupId'", (err, res) => {
-                if (err) {
-                    console.log(err);
-                }
-
-                res.rows.forEach((row) => {
-                    client.pushMessage(row['id'], message)
-                    .then(() => {
-                        console.log("PUSHメッセージの送信完了 送信先：" + row['id']);
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
-                })
-            });
-        }
+        // PUSHメッセージの送信
+        //console.log(to_user);
+        client.multicast(to_user, message)
+        .then(() => {
+            console.log("PUSHメッセージの送信完了 送信先：" + to_user);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
     });
+
+    // グループには１件ずつ送信
+    db_client.query("SELECT id FROM destination WHERE type='groupId'", (err, res) => {
+        if (err) {
+            console.log(err);
+        }
+
+        res.rows.forEach((row) => {
+            client.pushMessage(row['id'], message)
+            .then(() => {
+                console.log("PUSHメッセージの送信完了 送信先：" + row['id']);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+        })
+    });
+
+    // 遅延情報の取得とPUSHメッセージの送信
+    // request.get('https://tetsudo.rti-giken.jp/free/delay.json', (err,res,body) => {
+    //     if (err) {
+    //         console.log(err);
+    //         return;
+    //     }
+
+    //     let delay_flag = false;
+    //     // 取得したJSONをパースする
+    //     let train = "";
+    //     let json = JSON.parse(body);
+    //     json.forEach((data) => {
+    //         if (data.name == "京浜東北線" || data.name == "埼京線" || data.name == "京王線" || data.name == "東武東上線" || data.name == "武蔵野線" || data.name == "名鉄線") {
+    //             delay_flag = true;
+    //             train += ("\n・" + data.name);
+    //         }
+    //     });
+
+    //     // 遅延情報があればPUSHメッセージの送信
+    //     if (delay_flag == true) {
+    //         console.log("遅延が発生しています");
+    //         const message = {
+    //             type: 'text',
+    //             text: '現在、以下の交通網に遅延が発生しています\n' + train
+    //         };
+
+    //         let to_user = [];
+    //         // メッセージの送信先をDBから取得して送信先文字列を形成
+    //         db_client.query("SELECT id FROM destination WHERE type='userId'", (err, res) => {
+    //             if (err) {
+    //                 console.log(err);
+    //             }
+
+    //             res.rows.forEach((row) => {
+    //                 to_user.push(row['id']);
+    //             });
+
+    //             // PUSHメッセージの送信
+    //             //console.log(to_user);
+    //             client.multicast(to_user, message)
+    //             .then(() => {
+    //                 console.log("PUSHメッセージの送信完了 送信先：" + to_user);
+    //             })
+    //             .catch((err) => {
+    //                 console.log(err);
+    //             });
+    //         });
+
+    //         // グループには１件ずつ送信
+    //         db_client.query("SELECT id FROM destination WHERE type='groupId'", (err, res) => {
+    //             if (err) {
+    //                 console.log(err);
+    //             }
+
+    //             res.rows.forEach((row) => {
+    //                 client.pushMessage(row['id'], message)
+    //                 .then(() => {
+    //                     console.log("PUSHメッセージの送信完了 送信先：" + row['id']);
+    //                 })
+    //                 .catch((err) => {
+    //                     console.log(err);
+    //                 });
+    //             })
+    //         });
+    //     } else {
+    //         console.log("平常運行です");
+
+    //         const message = {
+    //             type: 'text',
+    //             text: '上人へ\n\nIPAにお金を払いましょう\n https://www.jitec.ipa.go.jp/1_01mosikomi/_index_mosikomi.html'
+    //         };
+
+    //         let to_user = [];
+    //         // メッセージの送信先をDBから取得して送信先文字列を形成
+    //         db_client.query("SELECT id FROM destination WHERE type='userId'", (err, res) => {
+    //             if (err) {
+    //                 console.log(err);
+    //             }
+
+    //             res.rows.forEach((row) => {
+    //                 to_user.push(row['id']);
+    //             });
+
+    //             // PUSHメッセージの送信
+    //             //console.log(to_user);
+    //             client.multicast(to_user, message)
+    //             .then(() => {
+    //                 console.log("PUSHメッセージの送信完了 送信先：" + to_user);
+    //             })
+    //             .catch((err) => {
+    //                 console.log(err);
+    //             });
+    //         });
+
+    //         // グループには１件ずつ送信
+    //         db_client.query("SELECT id FROM destination WHERE type='groupId'", (err, res) => {
+    //             if (err) {
+    //                 console.log(err);
+    //             }
+
+    //             res.rows.forEach((row) => {
+    //                 client.pushMessage(row['id'], message)
+    //                 .then(() => {
+    //                     console.log("PUSHメッセージの送信完了 送信先：" + row['id']);
+    //                 })
+    //                 .catch((err) => {
+    //                     console.log(err);
+    //                 });
+    //             })
+    //         });
+    //     }
+    // });
 }, null, true);
 
 // webhookのルーティング設定
